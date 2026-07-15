@@ -83,13 +83,6 @@ Committed to staying current with industry best practices
 
 ---
 
-GITHUB STATISTICS
-
-![GitHub Stats](https://github-readme-stats.vercel.app/api?username=areebachandnicheema&theme=default&show_icons=true&include_all_commits=true&count_private=true)
-
-![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=areebachandnicheema&theme=default&layout=compact)
-
----
 
 PROJECT EXPERIENCE
 
