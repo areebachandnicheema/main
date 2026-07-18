@@ -521,6 +521,27 @@
     color:#04050a;border:none;
   }
   .round-btn.send:hover{transform:translateY(-1px);}
+  .round-btn.active{
+    background:linear-gradient(135deg,var(--purple),var(--cyan));
+    color:#04050a;border:none;
+  }
+  .mode-row{display:flex;gap:8px;margin-bottom:10px;}
+  .mode-chip{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:12px;font-family:'Inter',sans-serif;font-weight:500;
+    padding:7px 14px;border-radius:100px;cursor:pointer;
+    background:var(--glass);border:1px solid var(--glass-border);color:var(--muted);
+    transition:color .2s,border-color .2s,background .2s;
+  }
+  .mode-chip:hover{color:var(--white);}
+  .mode-chip.active{
+    background:linear-gradient(135deg,var(--purple),var(--cyan));
+    color:#04050a;border:none;
+  }
+  .gen-image{
+    max-width:280px;width:100%;border-radius:14px;margin-top:8px;
+    border:1px solid var(--glass-border);display:block;
+  }
   .chat-hint{text-align:center;font-size:11px;color:var(--muted-dim);margin-top:12px;}
 
   .model-status{
@@ -858,7 +879,7 @@
     </div>
     <div class="brand"><span class="brand-mark"></span>ARAD GPT</div>
     <div class="chat-topbar-actions">
-      <span id="modelStatus" class="model-status mono">local ai · idle</span>
+      <span id="modelStatus" class="model-status mono">getting ready</span>
     </div>
   </div>
 
@@ -866,13 +887,19 @@
     <div class="chat-inner" id="chatInner">
       <div class="bubble-row ai">
         <div class="who">AI</div>
-        <div class="bubble">Hey — I'm ARAD, running fully in your browser. No account, no key. I started warming up as soon as this page loaded, so I should be ready — just send a message.</div>
+        <div class="bubble">Hey — I'm ARAD. Free, no account, no key. I'm already warming up, so I should be ready — type or tap the mic to talk. Switch to Image mode to have me draw something instead.</div>
       </div>
     </div>
   </div>
 
   <div class="chat-inputbar">
     <div class="chat-inputbar-inner">
+      <div class="mode-row">
+        <button type="button" class="mode-chip" id="imageModeBtn" title="Generate an image instead of text">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><path d="M21 15l-5-5L5 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Image
+        </button>
+      </div>
       <div class="pending-atts" id="pendingAtts"></div>
       <div class="chat-input-row glass">
         <div class="round-btn" id="attachBtn" title="Attach a file">
@@ -880,11 +907,17 @@
         </div>
         <input type="file" id="fileInput" multiple accept="image/*,application/pdf,audio/*,video/*" style="display:none;">
         <textarea id="chatInput" rows="1" placeholder="Message ARAD…"></textarea>
+        <div class="round-btn" id="micBtn" title="Speak your message">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 003-3V6a3 3 0 00-6 0v6a3 3 0 003 3z" stroke="currentColor" stroke-width="1.8"/><path d="M19 11a7 7 0 01-14 0M12 18v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <div class="round-btn" id="voiceToggleBtn" title="Read replies aloud: off">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 9v6h4l5 5V4L8 9H4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path id="voiceWaveIcon" d="M16.5 8.5a5 5 0 010 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="opacity:0.3;"/></svg>
+        </div>
         <div class="round-btn send" id="sendBtn" title="Send">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
       </div>
-      <div class="chat-hint" id="chatHint">Runs on-device with a small local AI model — 100% free, no signup, no API key. Files are attached as context by name (the local model can't view/listen to them yet).</div>
+      <div class="chat-hint" id="chatHint">Free, no signup, no API key. Tap the mic to talk, or switch to Image to generate a picture instead of text.</div>
     </div>
   </div>
 </div>
@@ -926,23 +959,23 @@
     if(engineLoading) return engineLoading;
 
     if(!supportsWebGPU()){
-      setStatus('error', 'webgpu unsupported');
-      chatHint.textContent = "This browser doesn't support the local AI (needs WebGPU — try a recent Chrome or Edge on desktop).";
+      setStatus('error', 'unsupported browser');
+      chatHint.textContent = "This browser can't run ARAD yet — try a recent Chrome or Edge on desktop.";
       throw new Error('no-webgpu');
     }
 
-    setStatus('loading', 'loading 0%');
+    setStatus('loading', 'getting ready 0%');
     engineLoading = CreateMLCEngine(MODEL_ID, {
       initProgressCallback: (p) => {
         const pct = Math.round((p.progress || 0) * 100);
-        setStatus('loading', `loading ${pct}%`);
+        setStatus('loading', `getting ready ${pct}%`);
       }
     }).then(e => {
       engine = e;
-      setStatus('ready', 'ready · on-device');
+      setStatus('ready', 'ready');
       return e;
     }).catch(err => {
-      setStatus('error', 'load failed');
+      setStatus('error', 'having trouble');
       engineLoading = null;
       throw err;
     });
@@ -976,7 +1009,98 @@
     heroSearchInput.value = '';
   });
 
-  attachBtn.addEventListener('click', ()=> fileInput.click());
+  const micBtn = document.getElementById('micBtn');
+  const voiceToggleBtn = document.getElementById('voiceToggleBtn');
+  const imageModeBtn = document.getElementById('imageModeBtn');
+
+  // ---------- voice input (speech-to-text) ----------
+  const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognizer = null;
+  let listening = false;
+  if(SpeechRecognitionAPI){
+    recognizer = new SpeechRecognitionAPI();
+    recognizer.continuous = false;
+    recognizer.interimResults = false;
+    recognizer.lang = 'en-US';
+    recognizer.onresult = (e)=>{
+      const said = e.results[0][0].transcript;
+      chatInput.value = (chatInput.value ? chatInput.value + ' ' : '') + said;
+      chatInput.dispatchEvent(new Event('input'));
+    };
+    recognizer.onend = ()=>{ listening = false; micBtn.classList.remove('active'); };
+    recognizer.onerror = ()=>{ listening = false; micBtn.classList.remove('active'); };
+  } else {
+    micBtn.style.opacity = '0.35';
+    micBtn.title = "Voice input isn't supported in this browser";
+  }
+  micBtn.addEventListener('click', ()=>{
+    if(!recognizer) return;
+    if(listening){ recognizer.stop(); return; }
+    listening = true;
+    micBtn.classList.add('active');
+    recognizer.start();
+  });
+
+  // ---------- voice output (text-to-speech) ----------
+  let voiceOn = false;
+  voiceToggleBtn.addEventListener('click', ()=>{
+    voiceOn = !voiceOn;
+    voiceToggleBtn.classList.toggle('active', voiceOn);
+    voiceToggleBtn.title = 'Read replies aloud: ' + (voiceOn ? 'on' : 'off');
+    if(!voiceOn) window.speechSynthesis.cancel();
+  });
+  function speak(text){
+    if(!voiceOn || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = 1;
+    window.speechSynthesis.speak(utter);
+  }
+
+  // ---------- image generation ----------
+  let imageMode = false;
+  imageModeBtn.addEventListener('click', ()=>{
+    imageMode = !imageMode;
+    imageModeBtn.classList.toggle('active', imageMode);
+    chatInput.placeholder = imageMode ? 'Describe the image to generate…' : 'Message ARAD…';
+    chatHint.textContent = imageMode
+      ? 'Image mode: describe what to draw. First image also needs a one-time model download.'
+      : 'Free, no signup, no API key. Tap the mic to talk, or switch to Image to generate a picture instead of text.';
+  });
+
+  let imgClient = null;
+  let imgLoading = null;
+  async function ensureImageClient(){
+    if(imgClient) return imgClient;
+    if(imgLoading) return imgLoading;
+    if(!supportsWebGPU()) throw new Error('no-webgpu');
+
+    imgLoading = import('https://esm.run/web-txt2img').then(async (mod) => {
+      const client = mod.Txt2ImgWorkerClient.createDefault();
+      const res = await client.load('sd-turbo', { backendPreference: ['webgpu'] }, (p) => {
+        const pct = p?.pct != null ? Math.round(p.pct) : null;
+        setStatus('loading', pct != null ? `getting ready ${pct}%` : 'getting ready');
+      });
+      if(!res?.ok) throw new Error(res?.message || 'image model failed to load');
+      imgClient = client;
+      setStatus('ready', 'ready');
+      return client;
+    }).catch(err => {
+      imgLoading = null;
+      throw err;
+    });
+    return imgLoading;
+  }
+
+  async function generateImage(prompt){
+    const client = await ensureImageClient();
+    const { promise } = client.generate({ prompt });
+    const res = await promise;
+    if(!res.ok) throw new Error(res.message || 'generation failed');
+    return URL.createObjectURL(res.blob);
+  }
+
+
   fileInput.addEventListener('change', async ()=>{
     for(const file of fileInput.files){
       const dataUrl = await new Promise((res)=>{
@@ -1025,7 +1149,7 @@
   });
   sendBtn.addEventListener('click', sendMessage);
 
-  function addBubble(role, text, attachments){
+  function addBubble(role, text, attachments, imageSrc){
     const row = document.createElement('div');
     row.className = 'bubble-row ' + (role === 'user' ? 'user' : 'ai');
     const who = document.createElement('div');
@@ -1037,6 +1161,12 @@
     row.appendChild(who);
     const wrap = document.createElement('div');
     wrap.appendChild(bubble);
+    if(imageSrc){
+      const img = document.createElement('img');
+      img.className = 'gen-image';
+      img.src = imageSrc;
+      wrap.appendChild(img);
+    }
     if(attachments && attachments.length){
       const attWrap = document.createElement('div');
       attWrap.className = 'bubble-attachments';
@@ -1085,8 +1215,26 @@
     pendingFiles = [];
     renderPendingAtts();
 
-    // Build a plain-text prompt — the on-device model is text-only, so
-    // attachments are noted by name rather than actually being "seen".
+    if(imageMode){
+      const isFirstLoad = !imgClient;
+      addTyping(isFirstLoad ? 'Getting the image tool ready (first time only)…' : 'Drawing…');
+      try {
+        const src = await generateImage(text);
+        removeTyping();
+        addBubble('assistant', `Here's "${text}":`, null, src);
+      } catch(err){
+        removeTyping();
+        if(err && err.message === 'no-webgpu'){
+          addBubble('assistant', "This browser can't generate images — it needs WebGPU support (try Chrome or Edge on a laptop/desktop).");
+        } else {
+          addBubble('assistant', "Couldn't generate that image. Try a simpler prompt or reload the page.");
+        }
+      }
+      return;
+    }
+
+    // Build a plain-text prompt — the text model can't actually see
+    // attachments, so they're noted by name rather than being "seen".
     let userText = text;
     for(const f of atts){
       userText += `\n[Attached ${f.kind}: ${f.name}]`;
@@ -1094,7 +1242,7 @@
     history.push({ role: 'user', content: userText });
 
     const isFirstLoad = !engine;
-    addTyping(isFirstLoad ? 'Loading local model (first time only)…' : null);
+    addTyping(isFirstLoad ? 'Getting ready (first time only)…' : null);
 
     try {
       const eng = await ensureEngine();
@@ -1102,7 +1250,7 @@
       addTyping();
 
       const messages = [
-        { role: 'system', content: 'You are ARAD, a helpful, friendly assistant running fully on-device in the browser. Be concise and useful.' },
+        { role: 'system', content: 'You are ARAD, a helpful, friendly assistant. Be concise and useful. You cannot generate images yourself in this mode — if asked to draw or generate a picture, tell the person to switch to Image mode using the Image button near the message box instead of describing or pretending to make one.' },
         ...history
       ];
 
@@ -1111,12 +1259,13 @@
       const replyText = reply?.choices?.[0]?.message?.content?.trim() || '(no response)';
       addBubble('assistant', replyText);
       history.push({ role: 'assistant', content: replyText });
+      speak(replyText);
     } catch(err){
       removeTyping();
       if(err && err.message === 'no-webgpu'){
-        addBubble('assistant', "Your browser can't run the local AI — it needs WebGPU support (try Chrome or Edge on a laptop/desktop).");
+        addBubble('assistant', "Your browser can't run ARAD — it needs WebGPU support (try Chrome or Edge on a laptop/desktop).");
       } else {
-        addBubble('assistant', "Something went wrong loading or running the local model. Try reloading the page.");
+        addBubble('assistant', "Something went wrong. Try reloading the page.");
       }
     }
   }
