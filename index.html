@@ -523,26 +523,20 @@
   .round-btn.send:hover{transform:translateY(-1px);}
   .chat-hint{text-align:center;font-size:11px;color:var(--muted-dim);margin-top:12px;}
 
-  /* ---------- settings modal ---------- */
-  .modal-overlay{
-    position:fixed;inset:0;z-index:300;
-    background:rgba(0,0,0,0.6);
-    display:none;align-items:center;justify-content:center;
-    padding:24px;
+  .model-status{
+    font-size:10px;color:var(--muted);
+    padding:8px 14px;border-radius:100px;
+    background:var(--glass);border:1px solid var(--glass-border);
+    display:flex;align-items:center;gap:7px;
   }
-  .modal-overlay.active{display:flex;}
-  .modal{
-    width:100%;max-width:420px;border-radius:20px;padding:28px;
+  .model-status::before{
+    content:'';width:6px;height:6px;border-radius:50%;
+    background:var(--muted-dim);
   }
-  .modal h3{font-size:17px;margin-bottom:8px;}
-  .modal p{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:18px;}
-  .modal input{
-    width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);
-    border-radius:12px;padding:12px 14px;color:var(--white);font-size:13.5px;
-    font-family:'IBM Plex Mono',monospace;margin-bottom:16px;
-  }
-  .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
-  .modal a.link{color:var(--cyan);text-decoration:underline;}
+  .model-status.loading::before{background:var(--purple-soft);animation:pulse 1s ease-in-out infinite;}
+  .model-status.ready::before{background:var(--cyan);box-shadow:0 0 8px var(--cyan);}
+  .model-status.error::before{background:var(--pink);}
+  @keyframes pulse{0%,100%{opacity:0.4;}50%{opacity:1;}}
 
   @media (prefers-reduced-motion: reduce){
     *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;}
@@ -864,9 +858,7 @@
     </div>
     <div class="brand"><span class="brand-mark"></span>ARAD GPT</div>
     <div class="chat-topbar-actions">
-      <div class="icon-btn" onclick="openSettings()" title="API key settings">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 13a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V19a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H4a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H10a1.65 1.65 0 001-1.51V4a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V10a1.65 1.65 0 001.51 1H20a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="1.5"/></svg>
-      </div>
+      <span id="modelStatus" class="model-status mono">local ai · idle</span>
     </div>
   </div>
 
@@ -874,7 +866,7 @@
     <div class="chat-inner" id="chatInner">
       <div class="bubble-row ai">
         <div class="who">AI</div>
-        <div class="bubble">Hey — I'm ARAD. Ask me anything, or attach an image or PDF and I'll take a look. (Add your Anthropic API key first via the settings icon above.)</div>
+        <div class="bubble">Hey — I'm ARAD, running fully in your browser. No account, no key — just send a message and I'll load my model first (one-time download, cached after that).</div>
       </div>
     </div>
   </div>
@@ -883,7 +875,7 @@
     <div class="chat-inputbar-inner">
       <div class="pending-atts" id="pendingAtts"></div>
       <div class="chat-input-row glass">
-        <div class="round-btn" id="attachBtn" title="Attach image, PDF, audio or video">
+        <div class="round-btn" id="attachBtn" title="Attach a file">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21.44 11.05l-9.19 9.19a5.5 5.5 0 01-7.78-7.78l9.19-9.19a3.5 3.5 0 014.95 4.95l-9.2 9.19a1.5 1.5 0 01-2.12-2.12l8.49-8.48" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <input type="file" id="fileInput" multiple accept="image/*,application/pdf,audio/*,video/*" style="display:none;">
@@ -892,25 +884,14 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
       </div>
-      <div class="chat-hint">ARAD reads text, images &amp; PDFs directly. Audio/video files are attached as context (name only) — full playback understanding isn't available yet.</div>
+      <div class="chat-hint" id="chatHint">Runs on-device with a small local AI model — 100% free, no signup, no API key. Files are attached as context by name (the local model can't view/listen to them yet).</div>
     </div>
   </div>
 </div>
 
-<!-- ================= SETTINGS MODAL ================= -->
-<div class="modal-overlay" id="settingsOverlay">
-  <div class="modal glass">
-    <h3>Connect your API key</h3>
-    <p>ARAD calls the Anthropic API directly from your browser. Your key is stored only in this browser (localStorage) and is never sent anywhere except api.anthropic.com. Get a key at <a class="link" href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>.</p>
-    <input type="password" id="apiKeyInput" placeholder="sk-ant-...">
-    <div class="modal-actions">
-      <a class="btn btn-ghost" onclick="closeSettings()">Cancel</a>
-      <a class="btn btn-primary" onclick="saveApiKey()">Save key</a>
-    </div>
-  </div>
-</div>
+<script type="module">
+  import { CreateMLCEngine } from "https://esm.run/@mlc-ai/web-llm";
 
-<script>
   // ================= CHAT LOGIC =================
   const chatView = document.getElementById('chatView');
   const chatScroll = document.getElementById('chatScroll');
@@ -920,35 +901,68 @@
   const attachBtn = document.getElementById('attachBtn');
   const fileInput = document.getElementById('fileInput');
   const pendingAttsEl = document.getElementById('pendingAtts');
-  const settingsOverlay = document.getElementById('settingsOverlay');
-  const apiKeyInput = document.getElementById('apiKeyInput');
   const heroSearchForm = document.getElementById('heroSearchForm');
   const heroSearchInput = document.getElementById('heroSearchInput');
+  const modelStatus = document.getElementById('modelStatus');
+  const chatHint = document.getElementById('chatHint');
 
-  let history = []; // {role, content: [blocks]} for the API
-  let pendingFiles = []; // {name, type, dataUrl, mediaType, kind}
+  const MODEL_ID = "Llama-3.2-1B-Instruct-q4f16_1-MLC";
+  let engine = null;
+  let engineLoading = null;
+  let history = []; // {role, content} plain strings for the local model
+  let pendingFiles = []; // {name, mediaType, dataUrl, kind}
+
+  function setStatus(state, label){
+    modelStatus.className = 'model-status mono ' + state;
+    modelStatus.textContent = label;
+  }
+
+  function supportsWebGPU(){
+    return typeof navigator !== 'undefined' && !!navigator.gpu;
+  }
+
+  async function ensureEngine(){
+    if(engine) return engine;
+    if(engineLoading) return engineLoading;
+
+    if(!supportsWebGPU()){
+      setStatus('error', 'webgpu unsupported');
+      chatHint.textContent = "This browser doesn't support the local AI (needs WebGPU — try a recent Chrome or Edge on desktop).";
+      throw new Error('no-webgpu');
+    }
+
+    setStatus('loading', 'loading 0%');
+    engineLoading = CreateMLCEngine(MODEL_ID, {
+      initProgressCallback: (p) => {
+        const pct = Math.round((p.progress || 0) * 100);
+        setStatus('loading', `loading ${pct}%`);
+      }
+    }).then(e => {
+      engine = e;
+      setStatus('ready', 'ready · on-device');
+      return e;
+    }).catch(err => {
+      setStatus('error', 'load failed');
+      engineLoading = null;
+      throw err;
+    });
+    return engineLoading;
+  }
 
   function openChat(prefill){
     chatView.classList.add('active');
     document.body.style.overflow = 'hidden';
     if(prefill){ chatInput.value = prefill; }
     setTimeout(()=>chatInput.focus(), 50);
+    // Warm the model up as soon as the chat opens, so it's ready by the time they hit send.
+    ensureEngine().catch(()=>{});
   }
   function closeChat(){
     chatView.classList.remove('active');
     document.body.style.overflow = '';
   }
-  function openSettings(){
-    apiKeyInput.value = localStorage.getItem('arad_api_key') || '';
-    settingsOverlay.classList.add('active');
-  }
-  function closeSettings(){ settingsOverlay.classList.remove('active'); }
-  function saveApiKey(){
-    const v = apiKeyInput.value.trim();
-    if(v) localStorage.setItem('arad_api_key', v);
-    else localStorage.removeItem('arad_api_key');
-    closeSettings();
-  }
+  window.openChat = openChat;
+  window.closeChat = closeChat;
 
   heroSearchForm.addEventListener('submit', (e)=>{
     e.preventDefault();
@@ -1042,11 +1056,11 @@
     return bubble;
   }
 
-  function addTyping(){
+  function addTyping(label){
     const row = document.createElement('div');
     row.className = 'bubble-row ai';
     row.id = 'typingRow';
-    row.innerHTML = `<div class="who">AI</div><div class="typing-dots"><span></span><span></span><span></span></div>`;
+    row.innerHTML = `<div class="who">AI</div><div>${label ? `<div class="bubble" style="color:var(--muted);font-size:13px;">${label}</div>` : ''}<div class="typing-dots"><span></span><span></span><span></span></div></div>`;
     chatInner.appendChild(row);
     chatScroll.scrollTop = chatScroll.scrollHeight;
   }
@@ -1059,13 +1073,6 @@
     const text = chatInput.value.trim();
     if(!text && pendingFiles.length === 0) return;
 
-    const apiKey = localStorage.getItem('arad_api_key');
-    if(!apiKey){
-      addBubble('assistant', "You'll need to add an Anthropic API key first — tap the settings icon at the top of this page.");
-      openSettings();
-      return;
-    }
-
     const atts = pendingFiles.slice();
     addBubble('user', text || '(sent attachment)', atts);
     chatInput.value = '';
@@ -1073,51 +1080,39 @@
     pendingFiles = [];
     renderPendingAtts();
 
-    // Build content blocks for the API
-    const content = [];
-    if(text) content.push({ type: 'text', text });
+    // Build a plain-text prompt — the on-device model is text-only, so
+    // attachments are noted by name rather than actually being "seen".
+    let userText = text;
     for(const f of atts){
-      const base64 = f.dataUrl.split(',')[1];
-      if(f.kind === 'image'){
-        content.push({ type: 'image', source: { type: 'base64', media_type: f.mediaType, data: base64 } });
-      } else if(f.kind === 'pdf'){
-        content.push({ type: 'document', source: { type: 'base64', media_type: f.mediaType, data: base64 } });
-      } else {
-        content.push({ type: 'text', text: `[Attached ${f.kind} file: ${f.name} — I can't listen to or watch this yet, just noting it was sent.]` });
-      }
+      userText += `\n[Attached ${f.kind}: ${f.name}]`;
     }
-    history.push({ role: 'user', content });
+    history.push({ role: 'user', content: userText });
 
-    addTyping();
+    const isFirstLoad = !engine;
+    addTyping(isFirstLoad ? 'Loading local model (first time only)…' : null);
+
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 1024,
-          system: 'You are ARAD, a helpful, friendly assistant embedded in the ARAD GPT product. Be concise and useful.',
-          messages: history
-        })
-      });
-      const data = await res.json();
+      const eng = await ensureEngine();
       removeTyping();
-      if(!res.ok){
-        const msg = data?.error?.message || 'Something went wrong talking to the API.';
-        addBubble('assistant', 'Error: ' + msg);
-        return;
-      }
-      const replyText = (data.content || []).map(b => b.text || '').join('\n').trim() || '(no response)';
+      addTyping();
+
+      const messages = [
+        { role: 'system', content: 'You are ARAD, a helpful, friendly assistant running fully on-device in the browser. Be concise and useful.' },
+        ...history
+      ];
+
+      const reply = await eng.chat.completions.create({ messages });
+      removeTyping();
+      const replyText = reply?.choices?.[0]?.message?.content?.trim() || '(no response)';
       addBubble('assistant', replyText);
-      history.push({ role: 'assistant', content: [{ type: 'text', text: replyText }] });
+      history.push({ role: 'assistant', content: replyText });
     } catch(err){
       removeTyping();
-      addBubble('assistant', 'Network error reaching the API. Check your connection and API key.');
+      if(err && err.message === 'no-webgpu'){
+        addBubble('assistant', "Your browser can't run the local AI — it needs WebGPU support (try Chrome or Edge on a laptop/desktop).");
+      } else {
+        addBubble('assistant', "Something went wrong loading or running the local model. Try reloading the page.");
+      }
     }
   }
 </script>
