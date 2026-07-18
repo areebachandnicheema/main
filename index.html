@@ -253,6 +253,20 @@
   .type-caret{display:inline-block;width:7px;height:14px;background:var(--cyan);margin-left:2px;animation:blink 1s steps(1) infinite;vertical-align:-2px;}
   @keyframes blink{50%{opacity:0;}}
 
+  /* ---------- hero search launcher ---------- */
+  .search-launcher{
+    display:flex;align-items:center;gap:12px;
+    padding:10px 10px 10px 22px;
+    border-radius:100px;
+  }
+  .search-icon{color:var(--muted);flex:none;display:flex;}
+  .search-launcher input{
+    flex:1;background:transparent;border:none;outline:none;
+    color:var(--white);font-family:'Inter',sans-serif;font-size:15px;
+  }
+  .search-launcher input::placeholder{color:var(--muted-dim);}
+  .search-go{flex:none;}
+
   /* ---------- section shared ---------- */
   section{position:relative;z-index:1;padding:150px 0;}
   .section-head{max-width:640px;margin:0 auto 64px;text-align:center;}
@@ -416,6 +430,120 @@
   .foot-col a:hover{opacity:1;}
   .foot-bottom{display:flex;justify-content:space-between;padding-top:26px;font-size:12.5px;color:var(--muted-dim);flex-wrap:wrap;gap:10px;}
 
+  /* ---------- chat view ---------- */
+  #chatView{
+    position:fixed;inset:0;z-index:200;
+    background:var(--void);
+    display:none;
+    flex-direction:column;
+  }
+  #chatView.active{display:flex;}
+  .chat-topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 24px;
+    border-bottom:1px solid var(--glass-border);
+    flex:none;
+  }
+  .chat-topbar .brand{font-size:14px;}
+  .chat-topbar-actions{display:flex;gap:10px;align-items:center;}
+  .icon-btn{
+    width:36px;height:36px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--glass);border:1px solid var(--glass-border);
+    color:var(--muted);cursor:pointer;transition:color .2s,border-color .2s;
+  }
+  .icon-btn:hover{color:var(--white);border-color:rgba(255,255,255,0.25);}
+
+  .chat-scroll{
+    flex:1;overflow-y:auto;
+    padding:32px 0 12px;
+  }
+  .chat-inner{max-width:760px;margin:0 auto;padding:0 24px;display:flex;flex-direction:column;gap:22px;}
+  .bubble-row{display:flex;gap:14px;max-width:100%;}
+  .bubble-row .who{
+    width:30px;height:30px;border-radius:9px;flex:none;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'IBM Plex Mono',monospace;font-size:10px;
+  }
+  .bubble-row.user .who{background:rgba(255,255,255,0.08);color:var(--muted);}
+  .bubble-row.ai .who{background:linear-gradient(135deg,var(--purple),var(--cyan));color:#04050a;font-weight:700;}
+  .bubble{
+    font-size:14.5px;line-height:1.65;color:var(--white);
+    padding-top:4px;white-space:pre-wrap;
+  }
+  .bubble-row.user .bubble{color:var(--muted);}
+  .bubble-attachments{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+  .att-thumb{width:64px;height:64px;border-radius:10px;object-fit:cover;border:1px solid var(--glass-border);}
+  .att-chip{
+    font-size:11px;color:var(--muted);padding:8px 12px;border-radius:10px;
+    background:var(--glass);border:1px solid var(--glass-border);
+    display:flex;align-items:center;gap:6px;
+  }
+  .typing-dots{display:inline-flex;gap:4px;padding-top:6px;}
+  .typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:tdot 1.2s ease-in-out infinite;}
+  .typing-dots span:nth-child(2){animation-delay:.15s;}
+  .typing-dots span:nth-child(3){animation-delay:.3s;}
+  @keyframes tdot{0%,60%,100%{opacity:0.25;transform:translateY(0);}30%{opacity:1;transform:translateY(-3px);}}
+
+  .chat-inputbar{flex:none;padding:16px 24px 26px;}
+  .chat-inputbar-inner{max-width:760px;margin:0 auto;}
+  .pending-atts{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+  .pending-att{
+    position:relative;display:flex;align-items:center;gap:6px;
+    font-size:11px;color:var(--muted);padding:6px 10px 6px 6px;border-radius:10px;
+    background:var(--glass);border:1px solid var(--glass-border);
+  }
+  .pending-att img{width:26px;height:26px;border-radius:6px;object-fit:cover;}
+  .pending-att .rm{cursor:pointer;color:var(--muted-dim);font-size:14px;line-height:1;}
+  .pending-att .rm:hover{color:var(--white);}
+
+  .chat-input-row{
+    display:flex;align-items:flex-end;gap:8px;
+    padding:8px 8px 8px 8px;
+    border-radius:26px;
+  }
+  .chat-input-row textarea{
+    flex:1;background:transparent;border:none;outline:none;resize:none;
+    color:var(--white);font-family:'Inter',sans-serif;font-size:14.5px;
+    max-height:160px;line-height:1.5;padding:10px 6px;
+  }
+  .chat-input-row textarea::placeholder{color:var(--muted-dim);}
+  .round-btn{
+    width:40px;height:40px;border-radius:50%;flex:none;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;border:1px solid transparent;
+    background:var(--glass);border:1px solid var(--glass-border);color:var(--muted);
+    transition:color .2s,border-color .2s,background .2s;
+  }
+  .round-btn:hover{color:var(--white);border-color:rgba(255,255,255,0.25);}
+  .round-btn.send{
+    background:linear-gradient(135deg,var(--purple),var(--cyan));
+    color:#04050a;border:none;
+  }
+  .round-btn.send:hover{transform:translateY(-1px);}
+  .chat-hint{text-align:center;font-size:11px;color:var(--muted-dim);margin-top:12px;}
+
+  /* ---------- settings modal ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;z-index:300;
+    background:rgba(0,0,0,0.6);
+    display:none;align-items:center;justify-content:center;
+    padding:24px;
+  }
+  .modal-overlay.active{display:flex;}
+  .modal{
+    width:100%;max-width:420px;border-radius:20px;padding:28px;
+  }
+  .modal h3{font-size:17px;margin-bottom:8px;}
+  .modal p{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:18px;}
+  .modal input{
+    width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);
+    border-radius:12px;padding:12px 14px;color:var(--white);font-size:13.5px;
+    font-family:'IBM Plex Mono',monospace;margin-bottom:16px;
+  }
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
+  .modal a.link{color:var(--cyan);text-decoration:underline;}
+
   @media (prefers-reduced-motion: reduce){
     *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;}
   }
@@ -433,12 +561,10 @@
     <div class="nav-links">
       <a href="#studio">Studio</a>
       <a href="#consistency">Consistency Engine</a>
-      <a href="#pricing">Pricing</a>
       <a href="#faq">FAQ</a>
     </div>
     <div class="nav-cta">
-      <a class="btn btn-ghost" href="#">Sign in</a>
-      <a class="btn btn-primary" href="#pricing">Start free</a>
+      <a class="btn btn-primary" href="#" onclick="openChat();return false;">Start chat</a>
     </div>
   </div>
 </nav>
@@ -448,7 +574,7 @@
   <h1>One intelligence.<br><span class="accent">Infinite possibilities.</span></h1>
   <p class="sub">ARAD GPT is a single workspace where conversation, image, video, audio, code, and research work as one connected mind — not eleven separate tabs.</p>
   <div class="hero-cta">
-    <a class="btn btn-primary" href="#pricing">Start creating</a>
+    <a class="btn btn-primary" href="#" onclick="openChat();return false;">Start creating</a>
     <a class="btn btn-ghost" href="#studio">See it think ↓</a>
   </div>
 
@@ -460,13 +586,13 @@
 </header>
 
 <div class="demo-wrap wrap">
-  <div class="demo glass">
-    <div class="demo-bar"><span></span><span></span><span></span>&nbsp;&nbsp;arad — universal chat</div>
-    <div class="demo-body">
-      <div class="msg user"><div class="who">YOU</div><p>Turn last week's meeting notes into a client-ready proposal, and mock up a cover image.</p></div>
-      <div class="msg ai"><div class="who">AI</div><p>Drafting the proposal now, keeping your existing pricing structure. Generating three cover directions in your brand palette<span class="type-caret"></span></p></div>
+  <form class="demo glass search-launcher" id="heroSearchForm">
+    <div class="search-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
-  </div>
+    <input id="heroSearchInput" type="text" placeholder="Ask ARAD anything — draft, analyze, generate, automate…" autocomplete="off">
+    <button type="submit" class="btn btn-primary search-go">Ask</button>
+  </form>
 </div>
 
 <section id="studio">
@@ -561,54 +687,6 @@
   </div>
 </section>
 
-<section id="pricing">
-  <div class="wrap">
-    <div class="section-head">
-      <div class="eyebrow mono">Pricing</div>
-      <h2>Start free. Scale when the work does.</h2>
-    </div>
-    <div class="plans">
-      <div class="plan glass">
-        <h3>Starter</h3>
-        <div class="price">$0<span>/month</span></div>
-        <p style="color:var(--muted);font-size:13.5px;">For trying the studio end to end.</p>
-        <ul>
-          <li>Universal chat, standard models</li>
-          <li>60 image generations / month</li>
-          <li>1 workspace</li>
-          <li>Community personas</li>
-        </ul>
-        <a class="btn btn-ghost">Get started</a>
-      </div>
-      <div class="plan glass feat">
-        <h3>Studio</h3>
-        <div class="price">$29<span>/month</span></div>
-        <p style="color:var(--muted);font-size:13.5px;">For creators shipping every day.</p>
-        <ul>
-          <li>Unlimited chat, priority models</li>
-          <li>Unlimited image + 120 video mins</li>
-          <li>Identity &amp; character lock</li>
-          <li>10 workspaces, custom personas</li>
-          <li>Automation builder</li>
-        </ul>
-        <a class="btn btn-primary">Start free trial</a>
-      </div>
-      <div class="plan glass">
-        <h3>Enterprise</h3>
-        <div class="price">Custom</div>
-        <p style="color:var(--muted);font-size:13.5px;">For teams with security and scale needs.</p>
-        <ul>
-          <li>SSO, role-based permissions</li>
-          <li>Dedicated capacity</li>
-          <li>Private model tuning</li>
-          <li>Audit logs &amp; data controls</li>
-        </ul>
-        <a class="btn btn-ghost">Talk to sales</a>
-      </div>
-    </div>
-  </div>
-</section>
-
 <section id="faq">
   <div class="wrap">
     <div class="section-head">
@@ -645,7 +723,6 @@
           <h4 class="mono">Product</h4>
           <a href="#studio">Studio</a>
           <a href="#consistency">Consistency engine</a>
-          <a href="#pricing">Pricing</a>
         </div>
         <div class="foot-col">
           <h4 class="mono">Company</h4>
@@ -775,6 +852,274 @@
       }
     });
   });
+</script>
+
+<!-- ================= CHAT VIEW ================= -->
+<div id="chatView">
+  <div class="chat-topbar">
+    <div class="chat-topbar-actions">
+      <div class="icon-btn" onclick="closeChat()" title="Back to home">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+    <div class="brand"><span class="brand-mark"></span>ARAD GPT</div>
+    <div class="chat-topbar-actions">
+      <div class="icon-btn" onclick="openSettings()" title="API key settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 13a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V19a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H4a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H10a1.65 1.65 0 001-1.51V4a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V10a1.65 1.65 0 001.51 1H20a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="1.5"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-scroll" id="chatScroll">
+    <div class="chat-inner" id="chatInner">
+      <div class="bubble-row ai">
+        <div class="who">AI</div>
+        <div class="bubble">Hey — I'm ARAD. Ask me anything, or attach an image or PDF and I'll take a look. (Add your Anthropic API key first via the settings icon above.)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-inputbar">
+    <div class="chat-inputbar-inner">
+      <div class="pending-atts" id="pendingAtts"></div>
+      <div class="chat-input-row glass">
+        <div class="round-btn" id="attachBtn" title="Attach image, PDF, audio or video">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21.44 11.05l-9.19 9.19a5.5 5.5 0 01-7.78-7.78l9.19-9.19a3.5 3.5 0 014.95 4.95l-9.2 9.19a1.5 1.5 0 01-2.12-2.12l8.49-8.48" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <input type="file" id="fileInput" multiple accept="image/*,application/pdf,audio/*,video/*" style="display:none;">
+        <textarea id="chatInput" rows="1" placeholder="Message ARAD…"></textarea>
+        <div class="round-btn send" id="sendBtn" title="Send">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div class="chat-hint">ARAD reads text, images &amp; PDFs directly. Audio/video files are attached as context (name only) — full playback understanding isn't available yet.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SETTINGS MODAL ================= -->
+<div class="modal-overlay" id="settingsOverlay">
+  <div class="modal glass">
+    <h3>Connect your API key</h3>
+    <p>ARAD calls the Anthropic API directly from your browser. Your key is stored only in this browser (localStorage) and is never sent anywhere except api.anthropic.com. Get a key at <a class="link" href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>.</p>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-...">
+    <div class="modal-actions">
+      <a class="btn btn-ghost" onclick="closeSettings()">Cancel</a>
+      <a class="btn btn-primary" onclick="saveApiKey()">Save key</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ================= CHAT LOGIC =================
+  const chatView = document.getElementById('chatView');
+  const chatScroll = document.getElementById('chatScroll');
+  const chatInner = document.getElementById('chatInner');
+  const chatInput = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const attachBtn = document.getElementById('attachBtn');
+  const fileInput = document.getElementById('fileInput');
+  const pendingAttsEl = document.getElementById('pendingAtts');
+  const settingsOverlay = document.getElementById('settingsOverlay');
+  const apiKeyInput = document.getElementById('apiKeyInput');
+  const heroSearchForm = document.getElementById('heroSearchForm');
+  const heroSearchInput = document.getElementById('heroSearchInput');
+
+  let history = []; // {role, content: [blocks]} for the API
+  let pendingFiles = []; // {name, type, dataUrl, mediaType, kind}
+
+  function openChat(prefill){
+    chatView.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    if(prefill){ chatInput.value = prefill; }
+    setTimeout(()=>chatInput.focus(), 50);
+  }
+  function closeChat(){
+    chatView.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  function openSettings(){
+    apiKeyInput.value = localStorage.getItem('arad_api_key') || '';
+    settingsOverlay.classList.add('active');
+  }
+  function closeSettings(){ settingsOverlay.classList.remove('active'); }
+  function saveApiKey(){
+    const v = apiKeyInput.value.trim();
+    if(v) localStorage.setItem('arad_api_key', v);
+    else localStorage.removeItem('arad_api_key');
+    closeSettings();
+  }
+
+  heroSearchForm.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const val = heroSearchInput.value.trim();
+    openChat(val);
+    heroSearchInput.value = '';
+  });
+
+  attachBtn.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', async ()=>{
+    for(const file of fileInput.files){
+      const dataUrl = await new Promise((res)=>{
+        const r = new FileReader();
+        r.onload = ()=>res(r.result);
+        r.readAsDataURL(file);
+      });
+      let kind = 'file';
+      if(file.type.startsWith('image/')) kind = 'image';
+      else if(file.type === 'application/pdf') kind = 'pdf';
+      else if(file.type.startsWith('audio/')) kind = 'audio';
+      else if(file.type.startsWith('video/')) kind = 'video';
+      pendingFiles.push({ name: file.name, mediaType: file.type, dataUrl, kind });
+    }
+    fileInput.value = '';
+    renderPendingAtts();
+  });
+
+  function renderPendingAtts(){
+    pendingAttsEl.innerHTML = '';
+    pendingFiles.forEach((f, i)=>{
+      const chip = document.createElement('div');
+      chip.className = 'pending-att';
+      if(f.kind === 'image'){
+        chip.innerHTML = `<img src="${f.dataUrl}"><span>${f.name}</span><span class="rm">✕</span>`;
+      } else {
+        chip.innerHTML = `<span>${f.kind.toUpperCase()} · ${f.name}</span><span class="rm">✕</span>`;
+      }
+      chip.querySelector('.rm').addEventListener('click', ()=>{
+        pendingFiles.splice(i,1);
+        renderPendingAtts();
+      });
+      pendingAttsEl.appendChild(chip);
+    });
+  }
+
+  chatInput.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+  chatInput.addEventListener('input', ()=>{
+    chatInput.style.height = 'auto';
+    chatInput.style.height = Math.min(chatInput.scrollHeight, 160) + 'px';
+  });
+  sendBtn.addEventListener('click', sendMessage);
+
+  function addBubble(role, text, attachments){
+    const row = document.createElement('div');
+    row.className = 'bubble-row ' + (role === 'user' ? 'user' : 'ai');
+    const who = document.createElement('div');
+    who.className = 'who';
+    who.textContent = role === 'user' ? 'YOU' : 'AI';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.textContent = text;
+    row.appendChild(who);
+    const wrap = document.createElement('div');
+    wrap.appendChild(bubble);
+    if(attachments && attachments.length){
+      const attWrap = document.createElement('div');
+      attWrap.className = 'bubble-attachments';
+      attachments.forEach(f=>{
+        if(f.kind === 'image'){
+          const img = document.createElement('img');
+          img.className = 'att-thumb';
+          img.src = f.dataUrl;
+          attWrap.appendChild(img);
+        } else {
+          const chip = document.createElement('div');
+          chip.className = 'att-chip';
+          chip.textContent = f.kind.toUpperCase() + ' · ' + f.name;
+          attWrap.appendChild(chip);
+        }
+      });
+      wrap.appendChild(attWrap);
+    }
+    row.appendChild(wrap);
+    chatInner.appendChild(row);
+    chatScroll.scrollTop = chatScroll.scrollHeight;
+    return bubble;
+  }
+
+  function addTyping(){
+    const row = document.createElement('div');
+    row.className = 'bubble-row ai';
+    row.id = 'typingRow';
+    row.innerHTML = `<div class="who">AI</div><div class="typing-dots"><span></span><span></span><span></span></div>`;
+    chatInner.appendChild(row);
+    chatScroll.scrollTop = chatScroll.scrollHeight;
+  }
+  function removeTyping(){
+    const row = document.getElementById('typingRow');
+    if(row) row.remove();
+  }
+
+  async function sendMessage(){
+    const text = chatInput.value.trim();
+    if(!text && pendingFiles.length === 0) return;
+
+    const apiKey = localStorage.getItem('arad_api_key');
+    if(!apiKey){
+      addBubble('assistant', "You'll need to add an Anthropic API key first — tap the settings icon at the top of this page.");
+      openSettings();
+      return;
+    }
+
+    const atts = pendingFiles.slice();
+    addBubble('user', text || '(sent attachment)', atts);
+    chatInput.value = '';
+    chatInput.style.height = 'auto';
+    pendingFiles = [];
+    renderPendingAtts();
+
+    // Build content blocks for the API
+    const content = [];
+    if(text) content.push({ type: 'text', text });
+    for(const f of atts){
+      const base64 = f.dataUrl.split(',')[1];
+      if(f.kind === 'image'){
+        content.push({ type: 'image', source: { type: 'base64', media_type: f.mediaType, data: base64 } });
+      } else if(f.kind === 'pdf'){
+        content.push({ type: 'document', source: { type: 'base64', media_type: f.mediaType, data: base64 } });
+      } else {
+        content.push({ type: 'text', text: `[Attached ${f.kind} file: ${f.name} — I can't listen to or watch this yet, just noting it was sent.]` });
+      }
+    }
+    history.push({ role: 'user', content });
+
+    addTyping();
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1024,
+          system: 'You are ARAD, a helpful, friendly assistant embedded in the ARAD GPT product. Be concise and useful.',
+          messages: history
+        })
+      });
+      const data = await res.json();
+      removeTyping();
+      if(!res.ok){
+        const msg = data?.error?.message || 'Something went wrong talking to the API.';
+        addBubble('assistant', 'Error: ' + msg);
+        return;
+      }
+      const replyText = (data.content || []).map(b => b.text || '').join('\n').trim() || '(no response)';
+      addBubble('assistant', replyText);
+      history.push({ role: 'assistant', content: [{ type: 'text', text: replyText }] });
+    } catch(err){
+      removeTyping();
+      addBubble('assistant', 'Network error reaching the API. Check your connection and API key.');
+    }
+  }
 </script>
 
 </body>
