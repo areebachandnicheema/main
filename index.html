@@ -866,7 +866,7 @@
     <div class="chat-inner" id="chatInner">
       <div class="bubble-row ai">
         <div class="who">AI</div>
-        <div class="bubble">Hey — I'm ARAD, running fully in your browser. No account, no key — just send a message and I'll load my model first (one-time download, cached after that).</div>
+        <div class="bubble">Hey — I'm ARAD, running fully in your browser. No account, no key. I started warming up as soon as this page loaded, so I should be ready — just send a message.</div>
       </div>
     </div>
   </div>
@@ -963,6 +963,11 @@
   }
   window.openChat = openChat;
   window.closeChat = closeChat;
+
+  // Start downloading/warming the model the moment the page loads, in the
+  // background — so by the time someone opens the chat and types, it's
+  // usually already ready instead of making them wait.
+  ensureEngine().catch(()=>{});
 
   heroSearchForm.addEventListener('submit', (e)=>{
     e.preventDefault();
