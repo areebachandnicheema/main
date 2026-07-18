@@ -1224,10 +1224,11 @@
         addBubble('assistant', `Here's "${text}":`, null, src);
       } catch(err){
         removeTyping();
+        console.error('ARAD image generation error:', err);
         if(err && err.message === 'no-webgpu'){
           addBubble('assistant', "This browser can't generate images — it needs WebGPU support (try Chrome or Edge on a laptop/desktop).");
         } else {
-          addBubble('assistant', "Couldn't generate that image. Try a simpler prompt or reload the page.");
+          addBubble('assistant', `Couldn't generate that image — here's why: ${err?.message || err || 'unknown error'}. (Open the browser console for more detail.)`);
         }
       }
       return;
