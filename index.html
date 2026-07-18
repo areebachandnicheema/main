@@ -1064,40 +1064,27 @@
     imageModeBtn.classList.toggle('active', imageMode);
     chatInput.placeholder = imageMode ? 'Describe the image to generate…' : 'Message ARAD…';
     chatHint.textContent = imageMode
-      ? 'Image mode: describe what to draw. First image also needs a one-time model download.'
+      ? 'Image mode: describe what to draw. Uses a free public image service — usually takes a few seconds.'
       : 'Free, no signup, no API key. Tap the mic to talk, or switch to Image to generate a picture instead of text.';
   });
 
-  let imgClient = null;
-  let imgLoading = null;
-  async function ensureImageClient(){
-    if(imgClient) return imgClient;
-    if(imgLoading) return imgLoading;
-    if(!supportsWebGPU()) throw new Error('no-webgpu');
-
-    imgLoading = import('https://esm.run/web-txt2img').then(async (mod) => {
-      const client = mod.Txt2ImgWorkerClient.createDefault();
-      const res = await client.load('sd-turbo', { backendPreference: ['webgpu'] }, (p) => {
-        const pct = p?.pct != null ? Math.round(p.pct) : null;
-        setStatus('loading', pct != null ? `getting ready ${pct}%` : 'getting ready');
-      });
-      if(!res?.ok) throw new Error(res?.message || 'image model failed to load');
-      imgClient = client;
-      setStatus('ready', 'ready');
-      return client;
-    }).catch(err => {
-      imgLoading = null;
-      throw err;
-    });
-    return imgLoading;
+  function buildImageUrl(prompt){
+    const seed = Math.floor(Math.random() * 1e9);
+    const encoded = encodeURIComponent(prompt).slice(0, 800);
+    return `https://image.pollinations.ai/prompt/${encoded}?width=768&height=768&nologo=true&seed=${seed}`;
   }
 
-  async function generateImage(prompt){
-    const client = await ensureImageClient();
-    const { promise } = client.generate({ prompt });
-    const res = await promise;
-    if(!res.ok) throw new Error(res.message || 'generation failed');
-    return URL.createObjectURL(res.blob);
+  function generateImage(prompt){
+    return new Promise((resolve, reject) => {
+      const url = buildImageUrl(prompt);
+      const img = new Image();
+      const timer = setTimeout(() => {
+        reject(new Error('Timed out waiting for the image service to respond.'));
+      }, 45000);
+      img.onload = () => { clearTimeout(timer); resolve(url); };
+      img.onerror = () => { clearTimeout(timer); reject(new Error("The free image service didn't respond — it may be busy right now. Try again in a moment.")); };
+      img.src = url;
+    });
   }
 
 
@@ -1216,8 +1203,11 @@
     renderPendingAtts();
 
     if(imageMode){
-      const isFirstLoad = !imgClient;
-      addTyping(isFirstLoad ? 'Getting the image tool ready (first time only)…' : 'Drawing…');
+      if(!text){
+        addBubble('assistant', "Describe what you'd like me to draw first.");
+        return;
+      }
+      addTyping('Drawing…');
       try {
         const src = await generateImage(text);
         removeTyping();
@@ -1225,11 +1215,7 @@
       } catch(err){
         removeTyping();
         console.error('ARAD image generation error:', err);
-        if(err && err.message === 'no-webgpu'){
-          addBubble('assistant', "This browser can't generate images — it needs WebGPU support (try Chrome or Edge on a laptop/desktop).");
-        } else {
-          addBubble('assistant', `Couldn't generate that image — here's why: ${err?.message || err || 'unknown error'}. (Open the browser console for more detail.)`);
-        }
+        addBubble('assistant', `Couldn't generate that image — here's why: ${err?.message || 'unknown error'}`);
       }
       return;
     }
